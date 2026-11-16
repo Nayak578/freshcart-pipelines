@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 """Pure-Python equivalents of the FreshCart order transformation rules."""
 
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation, ROUND_FLOOR
 import re
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
 _EMAIL_PATTERN = re.compile(
@@ -19,7 +21,7 @@ _ORDER_DATE_FORMATS = (
 )
 
 
-def normalize_email(value: Any) -> str | None:
+def normalize_email(value: Any) -> Optional[str]:
     """Trim and lowercase an email; return None for an empty value."""
     if value is None:
         return None
@@ -27,7 +29,7 @@ def normalize_email(value: Any) -> str | None:
     return normalized or None
 
 
-def normalize_name(value: Any) -> str | None:
+def normalize_name(value: Any) -> Optional[str]:
     """Collapse whitespace and apply title case to a customer name."""
     if value is None:
         return None
@@ -35,7 +37,7 @@ def normalize_name(value: Any) -> str | None:
     return normalized.title() or None
 
 
-def parse_order_date(value: Any) -> date | None:
+def parse_order_date(value: Any) -> Optional[date]:
     """Parse the date formats used by the web and mobile order feeds."""
     if value is None:
         return None
@@ -53,7 +55,7 @@ def parse_order_date(value: Any) -> date | None:
     return None
 
 
-def parse_amount(value: Any) -> Decimal | None:
+def parse_amount(value: Any) -> Optional[Decimal]:
     """Parse an amount while preserving decimal points and negative signs."""
     if value is None:
         return None
@@ -70,7 +72,7 @@ def parse_amount(value: Any) -> Decimal | None:
         return None
 
 
-def normalize_order(source: str, raw: dict[str, Any]) -> dict[str, Any]:
+def normalize_order(source: str, raw: Dict[str, Any]) -> Dict[str, Any]:
     """Normalize either supported order payload into common field names."""
     if source.lower() == "mobile":
         customer = raw.get("customer") or {}
@@ -134,7 +136,7 @@ def normalize_order(source: str, raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def validate_order(order: dict[str, Any]) -> list[str]:
+def validate_order(order: Dict[str, Any]) -> List[str]:
     """Return all validation failures without rejecting a missing amount."""
     reasons = []
     if not order.get("order_id"):
@@ -156,8 +158,8 @@ def validate_order(order: dict[str, Any]) -> list[str]:
 
 
 def normalize_and_validate_order(
-    source: str, raw: dict[str, Any]
-) -> tuple[dict[str, Any], list[str]]:
+    source: str, raw: Dict[str, Any]
+) -> Tuple[Dict[str, Any], List[str]]:
     """Normalize an order and return its validation reasons."""
     order = normalize_order(source, raw)
     amount_value = (
@@ -172,8 +174,8 @@ def normalize_and_validate_order(
 
 
 def deduplicate_orders(
-    orders: Iterable[dict[str, Any]]
-) -> list[dict[str, Any]]:
+    orders: Iterable[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     """Keep the newest record per order, preferring mobile on exact ties."""
     source_priority = {"web": 0, "mobile": 1}
     latest = {}
@@ -212,8 +214,8 @@ def loyalty_points(amount_inr: Decimal, multiplier: int) -> int:
 
 
 def fx_rate_for_date(
-    rates: dict[date, Decimal], target_date: date
-) -> Decimal | None:
+    rates: Dict[date, Decimal], target_date: date
+) -> Optional[Decimal]:
     """Return the latest available rate on or before a target date."""
     eligible_dates = [rate_date for rate_date in rates if rate_date <= target_date]
     if not eligible_dates:

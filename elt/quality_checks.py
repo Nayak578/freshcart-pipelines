@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Snowflake quality checks and baseline pipeline metrics."""
 
 

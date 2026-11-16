@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from math import isfinite
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
+from typing import List, Optional, Tuple
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -48,7 +49,7 @@ def get_landing_dir() -> Path:
     return landing_dir.resolve()
 
 
-def _validate_records(records, source: str) -> list[dict]:
+def _validate_records(records, source: str) -> List[dict]:
     if not isinstance(records, list):
         raise InvalidAPIResponseError(
             f"{source} response collection must be a JSON array"
@@ -60,7 +61,7 @@ def _validate_records(records, source: str) -> list[dict]:
     return records
 
 
-def _validate_secure_url(candidate: str, origin: tuple[str, str, int] | None = None):
+def _validate_secure_url(candidate: str, origin: Optional[Tuple[str, str, int]] = None):
     if not isinstance(candidate, str) or not candidate.strip():
         raise PaginationError("Pagination URL must be a non-empty string")
     try:
@@ -341,8 +342,8 @@ def fx_rates(session, start, end, mock=False):
 
 
 def _validate_fx_responses(
-    responses, expected_bases: list[str] | None = None
-) -> list[dict]:
+    responses, expected_bases: Optional[List[str]] = None
+) -> List[dict]:
     if not isinstance(responses, list) or not responses:
         raise InvalidAPIResponseError(
             "FX response must contain at least one response object"

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Command-line orchestration for the FreshCart Snowflake ELT pipeline."""
 
 import argparse
@@ -5,6 +7,7 @@ from datetime import date, datetime, timedelta, timezone
 from dataclasses import dataclass
 from pathlib import Path
 import sys
+from typing import Dict, List, Optional, Tuple
 from uuid import uuid4
 
 from dotenv import load_dotenv

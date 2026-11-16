@@ -4,3 +4,4 @@ pytest
 snowflake-connector-python
 python-dotenv
 requests
+pyyaml

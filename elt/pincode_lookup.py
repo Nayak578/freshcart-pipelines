@@ -1,7 +1,7 @@
 """Incremental pincode lookups and Bronze ingestion."""
 
 from datetime import date
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from . import extract
 from .snowflake_io import load_file
@@ -24,7 +24,7 @@ ORDER BY orders.PINCODE
 """
 
 
-def _missing_pincodes(connection) -> list[str]:
+def _missing_pincodes(connection) -> List[str]:
     cursor = connection.cursor()
     try:
         cursor.execute(MISSING_PINCODES_SQL)
@@ -37,7 +37,7 @@ def load_missing_pincodes(
     connection,
     run_id: str,
     mock: bool = True,
-    run_date: date | None = None,
+    run_date: Optional[date] = None,
 ) -> int:
     """Fetch, land, and load only missing pincode responses."""
     pins = _missing_pincodes(connection)
@@ -47,7 +47,7 @@ def load_missing_pincodes(
 
     session = extract.http_session()
     try:
-        records: list[dict[str, Any]] = extract.pincodes(
+        records: List[Dict[str, Any]] = extract.pincodes(
             session,
             pins,
             mock=mock,

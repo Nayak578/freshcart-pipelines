@@ -13,18 +13,21 @@ MAGE_CONTAINER = "freshcart-mage"
 
 
 def _container_project_path(project_path):
-    result = subprocess.run(
-        [
-            "docker",
-            "inspect",
-            "--format",
-            "{{range .Mounts}}{{.Source}}|{{.Destination}}{{println}}{{end}}",
-            MAGE_CONTAINER,
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                "--format",
+                "{{range .Mounts}}{{.Source}}|{{.Destination}}{{println}}{{end}}",
+                MAGE_CONTAINER,
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (FileNotFoundError, OSError):
+        pytest.skip(f"Docker is not available or Mage container {MAGE_CONTAINER!r} is not running.")
     if result.returncode:
         pytest.skip(f"Mage container {MAGE_CONTAINER!r} is not available.")
 
